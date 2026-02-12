@@ -14,6 +14,11 @@ export default function AdminDashboard() {
   const admin = JSON.parse(localStorage.getItem("user")!);
   const [tickets, setTickets] = useState<any[]>([]);
   const [remarks, setRemarks] = useState<Record<string, string>>({});
+const logout = () => {
+  localStorage.removeItem("user");
+  window.location.href = import.meta.env.BASE_URL + "login";
+};
+
 
   // 🔄 Load ALL tickets
   useEffect(() => {
@@ -44,7 +49,17 @@ export default function AdminDashboard() {
   };
 
   return (
+    
     <div className="p-6">
+      <div className="flex justify-end mb-4">
+  <button
+    onClick={logout}
+    className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
+  >
+    Logout
+  </button>
+</div>
+
       <h1 className="text-2xl mb-4">All Tickets</h1>
 
       {tickets.map((t) => (

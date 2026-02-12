@@ -42,6 +42,11 @@ export default function UserDashboard() {
   /* ===== STATE ===== */
   const [tickets, setTickets] = useState<any[]>([]);
   const [showMyTickets, setShowMyTickets] = useState(false);
+  const logout = () => {
+  localStorage.removeItem("user");
+  window.location.href = import.meta.env.BASE_URL + "login";
+};
+
 
   // Form state
   const [businessUnit, setBusinessUnit] = useState("");
@@ -108,6 +113,15 @@ export default function UserDashboard() {
   return (
     <div className="p-6">
       {/* ===== CREATE TICKET ===== */}
+      <div className="flex justify-end mb-4">
+  <button
+    onClick={logout}
+    className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
+  >
+    Logout
+  </button>
+</div>
+
       <h1 className="text-xl font-semibold mb-4">Create Ticket</h1>
 
       <div className="space-y-3 max-w-lg">

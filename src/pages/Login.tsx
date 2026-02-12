@@ -2,6 +2,8 @@ import { useState } from "react";
 import { login } from "../auth/auth";
 
 export default function Login() {
+    localStorage.removeItem("user");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -18,7 +20,8 @@ export default function Login() {
 
 
       // HARD redirect – no router involved
-      window.location.reload();
+      window.location.href = import.meta.env.BASE_URL;
+
     } catch (err: any) {
       alert(err.message || "Invalid credentials");
     }
