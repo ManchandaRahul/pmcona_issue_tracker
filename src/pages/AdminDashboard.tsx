@@ -16,8 +16,9 @@ export default function AdminDashboard() {
   const [remarks, setRemarks] = useState<Record<string, string>>({});
 const logout = () => {
   localStorage.removeItem("user");
-  window.location.href = import.meta.env.BASE_URL + "login";
+  window.location.href = import.meta.env.BASE_URL;
 };
+
 
 
   // 🔄 Load ALL tickets

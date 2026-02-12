@@ -42,10 +42,12 @@ export default function UserDashboard() {
   /* ===== STATE ===== */
   const [tickets, setTickets] = useState<any[]>([]);
   const [showMyTickets, setShowMyTickets] = useState(false);
-  const logout = () => {
+const logout = () => {
   localStorage.removeItem("user");
-  window.location.href = import.meta.env.BASE_URL + "login";
+  window.location.href = import.meta.env.BASE_URL;
 };
+
+
 
 
   // Form state
