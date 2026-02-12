@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support / Issue Tracker</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background-color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .app-wrapper {
+        background: #ffffff;
+        width: 100%;
+        max-width: 1100px;
+        min-height: 80vh;
+        border-radius: 6px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid #ddd;
+        font-size: 18px;
+        font-weight: bold;
+        background-color: #f9fafb;
+      }
+
+      .app-content {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .app-footer {
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        background-color: #f9fafb;
+      }
+    </style>
+  </head>
+
+  <body class="antialiased">
+    <div class="app-wrapper">
+      <div class="app-header">
+        Support / Issue Tracker
+      </div>
+
+      <div class="app-content">
+        <!-- React renders everything here -->
+        <div id="root"></div>
+      </div>
+
+      <div class="app-footer">
+        Internal Tool • For Authorized Users Only
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
