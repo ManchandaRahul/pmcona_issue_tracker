@@ -7,19 +7,6 @@ const STATUSES = ["New", "In Progress", "Reassigned", "Closed"];
 const ASSIGNEES = ["Rashmi", "Jayshree"];
 const PRIORITIES = ["Low", "Medium", "High"];
 
-const statusColor = (status: string) => {
-  if (status === "Closed") return "#16a34a";
-  if (status === "In Progress") return "#2563eb";
-  if (status === "Reassigned") return "#d97706";
-  return "#6b7280";
-};
-
-const priorityColor = (p: string) => {
-  if (p === "High") return "#dc2626";
-  if (p === "Medium") return "#d97706";
-  return "#16a34a";
-};
-
 export default function AdminDashboard() {
   const admin = JSON.parse(localStorage.getItem("user")!);
 
