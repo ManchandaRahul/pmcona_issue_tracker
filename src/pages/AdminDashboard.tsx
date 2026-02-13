@@ -24,7 +24,6 @@ export default function AdminDashboard() {
   const admin = JSON.parse(localStorage.getItem("user")!);
 
   const [tickets, setTickets] = useState<any[]>([]);
-  const [remarks, setRemarks] = useState<Record<string, string>>({});
   const [priorityFilter, setPriorityFilter] = useState("All"); // ✅ NEW
 
   useEffect(() => {
