@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
 import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore";
+import * as XLSX from "xlsx";
 
 const STATUSES = ["New", "In Progress", "Reassigned", "Closed"];
 const ASSIGNEES = ["Rashmi", "Jayshree"];
@@ -21,14 +22,22 @@ const priorityColor = (p: string) => {
 
 export default function AdminDashboard() {
   const admin = JSON.parse(localStorage.getItem("user")!);
+
   const [tickets, setTickets] = useState<any[]>([]);
   const [remarks, setRemarks] = useState<Record<string, string>>({});
+  const [priorityFilter, setPriorityFilter] = useState("All"); // ✅ NEW
 
   useEffect(() => {
     return onSnapshot(collection(db, "tickets"), (snap) => {
       setTickets(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
   }, []);
+
+  // ✅ FILTERED TICKETS
+  const filteredTickets =
+    priorityFilter === "All"
+      ? tickets
+      : tickets.filter((t) => t.priority === priorityFilter);
 
   const updateStatus = async (ticketId: string, status: string) => {
     const payload: any = { status, updatedAt: new Date() };
@@ -59,6 +68,35 @@ export default function AdminDashboard() {
     });
   };
 
+  // 📥 EXCEL DOWNLOAD (RESPECTS FILTER)
+  const downloadExcel = () => {
+    const rows = filteredTickets.map((t) => ({
+      Date: t.date || "",
+      "Created By": t.createdBy || "",
+      "Business Unit": t.businessUnit || "",
+      Module: t.module || "",
+      "Support Type": t.supportType || "",
+      Description: t.description || "",
+      Status: t.status || "",
+      Priority: t.priority || "",
+      "Assigned To": t.assignedTo || "",
+      "Resolved By": t.resolvedBy || "",
+      "Resolved Date": t.resolvedDate || "",
+      "Resolution Remarks": t.resolutionRemarks || "",
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Tickets");
+
+    XLSX.writeFile(
+      wb,
+      `PM_CONA_Tickets_${priorityFilter}_${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`
+    );
+  };
+
   const logout = () => {
     localStorage.removeItem("user");
     window.location.href = import.meta.env.BASE_URL;
@@ -66,24 +104,64 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 24,
+          alignItems: "center",
+        }}
+      >
         <h1 style={{ fontSize: 26, fontWeight: 600 }}>All Tickets</h1>
- <button
-  onClick={logout}
-  style={{
-    backgroundColor: "#dc2626", // red
-    color: "#ffffff",
-    padding: "8px 16px",
-    border: "none",
-    borderRadius: 4,
-    cursor: "pointer",
-  }}
->
-  Logout
-</button>
+
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          {/* PRIORITY FILTER */}
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            style={{ padding: "6px 10px" }}
+          >
+            <option value="All">All Priorities</option>
+            {PRIORITIES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={downloadExcel}
+            style={{
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              padding: "8px 14px",
+              border: "none",
+              borderRadius: 4,
+              cursor: "pointer",
+            }}
+          >
+            Download Excel
+          </button>
+
+          <button
+            onClick={logout}
+            style={{
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              padding: "8px 14px",
+              border: "none",
+              borderRadius: 4,
+              cursor: "pointer",
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
-      {tickets.map((t) => (
+      {/* TICKETS */}
+      {filteredTickets.map((t) => (
         <div
           key={t.id}
           style={{
@@ -103,14 +181,19 @@ export default function AdminDashboard() {
             <div><b>Description:</b> {t.description}</div>
           </div>
 
-          <div style={{ display: "flex", gap: 20, marginBottom: 12 }}>
+          <div style={{ display: "flex", gap: 24, marginBottom: 12 }}>
+            {/* Status */}
             <div>
               <label>Status</label><br />
-              <select value={t.status} onChange={(e) => updateStatus(t.id, e.target.value)}>
+              <select
+                value={t.status}
+                onChange={(e) => updateStatus(t.id, e.target.value)}
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
+
               <span
                 style={{
                   marginLeft: 8,
@@ -125,14 +208,19 @@ export default function AdminDashboard() {
               </span>
             </div>
 
+            {/* Priority */}
             <div>
               <label>Priority</label><br />
-              <select value={t.priority || ""} onChange={(e) => updatePriority(t.id, e.target.value)}>
+              <select
+                value={t.priority || ""}
+                onChange={(e) => updatePriority(t.id, e.target.value)}
+              >
                 <option value="">Select</option>
                 {PRIORITIES.map((p) => (
                   <option key={p} value={p}>{p}</option>
                 ))}
               </select>
+
               {t.priority && (
                 <span
                   style={{
@@ -151,34 +239,17 @@ export default function AdminDashboard() {
           </div>
 
           {t.status === "Reassigned" && (
-            <div style={{ marginBottom: 12 }}>
+            <div>
               <label>Reassign To</label><br />
-              <select value={t.assignedTo || ""} onChange={(e) => updateAssignee(t.id, e.target.value)}>
+              <select
+                value={t.assignedTo || ""}
+                onChange={(e) => updateAssignee(t.id, e.target.value)}
+              >
                 <option value="">Select</option>
                 {ASSIGNEES.map((a) => (
                   <option key={a} value={a}>{a}</option>
                 ))}
               </select>
-            </div>
-          )}
-
-          {t.status !== "Closed" && (
-            <div>
-              <label>Resolution Remarks</label>
-              <textarea
-                style={{ width: "100%", marginTop: 6 }}
-                rows={2}
-                value={remarks[t.id] || ""}
-                onChange={(e) => setRemarks({ ...remarks, [t.id]: e.target.value })}
-              />
-            </div>
-          )}
-
-          {t.status === "Closed" && (
-            <div style={{ marginTop: 12, fontSize: 14 }}>
-              <div><b>Resolved By:</b> {t.resolvedBy}</div>
-              <div><b>Resolved Date:</b> {t.resolvedDate}</div>
-              <div><b>Remarks:</b> {t.resolutionRemarks}</div>
             </div>
           )}
         </div>

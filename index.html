@@ -37,7 +37,8 @@
         border-bottom: 1px solid #ddd;
         font-size: 18px;
         font-weight: bold;
-        background-color: #f9fafb;
+       background-color: #e5e7eb;
+
       }
 
       .app-content {
@@ -59,19 +60,29 @@
 
   <body class="antialiased">
     <div class="app-wrapper">
-      <div class="app-header">
-
-      </div>
+<div class="app-header" style="display:flex; align-items:center; gap:12px;">
+  <img
+    src="/pmcona-logo.png"
+    alt="PM CONA"
+    style="height:40px;"
+  />
+  <span>Issue Tracker</span>
+</div>
 
       <div class="app-content">
         <!-- React renders everything here -->
         <div id="root"></div>
       </div>
 
-      <div class="app-footer">
-        Internal Tool • For Authorized Users Only
-      </div>
-    </div>
+<div class="app-footer">
+  <span>Created by</span>
+  <img
+    src="/karuyaki.png"
+    alt="Karuyaki"
+    style="height:30px; vertical-align:middle; margin-left:6px;"
+  />
+</div>
+
 
     <script type="module" src="/src/main.tsx"></script>
   </body>
