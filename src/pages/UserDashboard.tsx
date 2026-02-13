@@ -39,35 +39,22 @@ const SUPPORT_TYPES = [
 export default function UserDashboard() {
   const user = JSON.parse(localStorage.getItem("user")!);
 
-  /* ===== STATE ===== */
   const [tickets, setTickets] = useState<any[]>([]);
   const [showMyTickets, setShowMyTickets] = useState(false);
-const logout = () => {
-  localStorage.removeItem("user");
-  window.location.href = import.meta.env.BASE_URL;
-};
 
-
-
-
-  // Form state
   const [businessUnit, setBusinessUnit] = useState("");
   const [module, setModule] = useState("");
-  const [supportType, setSupportType] = useState("");
+const [supportType, setSupportType] = useState("");
+
   const [description, setDescription] = useState("");
 
   const today = new Date().toISOString().slice(0, 10);
 
-  /* ===== CLEAR FORM ON LOAD ===== */
-  useEffect(() => {
-    setBusinessUnit("");
-    setModule("");
-    setSupportType("");
-    setDescription("");
-    setShowMyTickets(false);
-  }, []);
+  const logout = () => {
+    localStorage.removeItem("user");
+    window.location.href = import.meta.env.BASE_URL;
+  };
 
-  /* ===== LOAD USER TICKETS ===== */
   useEffect(() => {
     const q = query(
       collection(db, "tickets"),
@@ -79,157 +66,171 @@ const logout = () => {
     });
   }, []);
 
-  /* ===== SUBMIT TICKET ===== */
   const submitTicket = async () => {
     if (!businessUnit || !module || !supportType || !description) {
       alert("Please fill all fields");
       return;
     }
 
-    try {
-      await addDoc(collection(db, "tickets"), {
-        date: today,
-        businessUnit,
-        module,
-        supportType,
-        description,
-        status: "New",
-        createdBy: user.email,
-        createdAt: new Date(),
-      });
+    await addDoc(collection(db, "tickets"), {
+      date: today,
+      businessUnit,
+      module,
+      supportType,
+      description,
+      status: "New",
+      createdBy: user.email,
+      createdAt: new Date(),
+    });
 
-      // Reset form
-      setBusinessUnit("");
-      setModule("");
-      setSupportType("");
-      setDescription("");
-
-      // Optionally auto-expand My Tickets
-      setShowMyTickets(true);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create ticket");
-    }
+    setBusinessUnit("");
+    setModule("");
+    setSupportType("");
+    setDescription("");
+    setShowMyTickets(true);
   };
 
-  return (
-    <div className="p-6">
-      {/* ===== CREATE TICKET ===== */}
-      <div className="flex justify-end mb-4">
-  <button
-    onClick={logout}
-    className="border px-4 py-1 rounded text-sm hover:bg-gray-100"
-  >
-    Logout
-  </button>
-</div>
+// (imports stay the same)
 
-      <h1 className="text-xl font-semibold mb-4">Create Ticket</h1>
+return (
+  <div style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
+    {/* HEADER */}
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+      <h2>Support / Issue Tracker</h2>
+      <button
+  onClick={logout}
+  style={{
+    backgroundColor: "#dc2626", // red
+    color: "#ffffff",
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: 4,
+    cursor: "pointer",
+  }}
+>
+  Logout
+</button>
 
-      <div className="space-y-3 max-w-lg">
-        <div>
-          <label>Date</label>
+    </div>
+
+    {/* CREATE TICKET */}
+    <div style={{ border: "1px solid #ccc", padding: 24, marginBottom: 32 }}>
+      <h3 style={{ marginBottom: 16 }}>Create Ticket</h3>
+
+      <div style={{ maxWidth: 500 }}>
+        {/* Date */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Date</label>
           <input
             type="date"
             value={today}
             disabled
-            className="border w-full px-2 py-1 bg-gray-100"
+            style={{ width: "100%", padding: 6 }}
           />
         </div>
 
-        <div>
-          <label>Business Unit</label>
+        {/* Business Unit */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Business Unit</label>
           <select
             value={businessUnit}
             onChange={(e) => setBusinessUnit(e.target.value)}
-            className="border w-full px-2 py-1"
+            style={{ width: "100%", padding: 6 }}
           >
             <option value="">Select</option>
-            {BUSINESS_UNITS.map((bu) => (
-              <option key={bu} value={bu}>{bu}</option>
-            ))}
+            {BUSINESS_UNITS.map((b) => <option key={b}>{b}</option>)}
           </select>
         </div>
 
-        <div>
-          <label>Module</label>
+        {/* Module */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Module</label>
           <select
             value={module}
             onChange={(e) => setModule(e.target.value)}
-            className="border w-full px-2 py-1"
+            style={{ width: "100%", padding: 6 }}
           >
             <option value="">Select</option>
-            {MODULES.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
+            {MODULES.map((m) => <option key={m}>{m}</option>)}
           </select>
         </div>
 
-        <div>
-          <label>Support Type</label>
+        {/* Support Type */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Support Type</label>
           <select
             value={supportType}
             onChange={(e) => setSupportType(e.target.value)}
-            className="border w-full px-2 py-1"
+            style={{ width: "100%", padding: 6 }}
           >
             <option value="">Select</option>
-            {SUPPORT_TYPES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
+            {SUPPORT_TYPES.map((s) => <option key={s}>{s}</option>)}
           </select>
         </div>
 
-        <div>
-          <label>Description</label>
+        {/* Description */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", marginBottom: 4 }}>Description</label>
           <textarea
-            rows={3}
+            rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="border w-full px-2 py-1"
+            style={{
+              width: "100%",
+              minHeight: 80,
+              padding: 8,
+              resize: "vertical",
+            }}
           />
         </div>
 
-        <button
-          onClick={submitTicket}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Submit Ticket
-        </button>
-      </div>
+<button
+  onClick={submitTicket}
+  style={{
+    backgroundColor: "#16a34a", // green
+    color: "#ffffff",
+    padding: "10px 16px",
+    border: "none",
+    borderRadius: 4,
+    cursor: "pointer",
+  }}
+>
+  Submit Ticket
+</button>
 
-      {/* ===== MY TICKETS (EXPAND / COLLAPSE) ===== */}
-      <div className="mt-8 max-w-3xl">
-        <div
-          onClick={() => setShowMyTickets(!showMyTickets)}
-          className="cursor-pointer font-semibold text-lg"
-        >
-          My Tickets {showMyTickets ? "▲" : "▼"}
-        </div>
-
-        {showMyTickets && (
-          <div className="mt-3">
-            {tickets.length === 0 && (
-              <div className="text-gray-500 text-sm">
-                No tickets created yet
-              </div>
-            )}
-
-            {tickets.map((t) => (
-              <div
-                key={t.id}
-                className="border rounded p-3 mb-2 bg-gray-50"
-              >
-                <div><b>Date:</b> {t.date}</div>
-                <div><b>Business Unit:</b> {t.businessUnit}</div>
-                <div><b>Module:</b> {t.module}</div>
-                <div><b>Support Type:</b> {t.supportType}</div>
-                <div><b>Status:</b> {t.status}</div>
-                <div><b>Description:</b> {t.description}</div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
-  );
+
+    {/* MY TICKETS */}
+    <div style={{ border: "1px solid #ccc", padding: 24 }}>
+      <h3
+        style={{ cursor: "pointer", marginBottom: 16 }}
+        onClick={() => setShowMyTickets(!showMyTickets)}
+      >
+        My Tickets {showMyTickets ? "▲" : "▼"}
+      </h3>
+
+      {showMyTickets &&
+        tickets.map((t) => (
+          <div
+            key={t.id}
+            style={{
+              border: "1px solid #999",
+              padding: 16,
+              marginBottom: 16,
+              background: "#f9f9f9",
+            }}
+          >
+            <div><b>Date:</b> {t.date}</div>
+            <div><b>Status:</b> {t.status}</div>
+            <div><b>Business Unit:</b> {t.businessUnit}</div>
+            <div><b>Module:</b> {t.module}</div>
+            <div><b>Support Type:</b> {t.supportType}</div>
+            <div><b>Description:</b> {t.description}</div>
+          </div>
+        ))}
+    </div>
+  </div>
+);
+
 }
