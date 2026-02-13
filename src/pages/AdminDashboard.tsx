@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const admin = JSON.parse(localStorage.getItem("user")!);
 
   const [tickets, setTickets] = useState<any[]>([]);
-  const [priorityFilter, setPriorityFilter] = useState("All"); // ✅ NEW
+  const [priorityFilter, setPriorityFilter] = useState("All");
 
   useEffect(() => {
     return onSnapshot(collection(db, "tickets"), (snap) => {
@@ -32,7 +32,6 @@ export default function AdminDashboard() {
     });
   }, []);
 
-  // ✅ FILTERED TICKETS
   const filteredTickets =
     priorityFilter === "All"
       ? tickets
@@ -44,7 +43,6 @@ export default function AdminDashboard() {
     if (status === "Closed") {
       payload.resolvedDate = new Date().toISOString().slice(0, 10);
       payload.resolvedBy = admin.email;
-      payload.resolutionRemarks = remarks[ticketId] || "";
       payload.assignedTo = null;
     }
 
@@ -67,7 +65,6 @@ export default function AdminDashboard() {
     });
   };
 
-  // 📥 EXCEL DOWNLOAD (RESPECTS FILTER)
   const downloadExcel = () => {
     const rows = filteredTickets.map((t) => ({
       Date: t.date || "",
@@ -115,7 +112,6 @@ export default function AdminDashboard() {
         <h1 style={{ fontSize: 26, fontWeight: 600 }}>All Tickets</h1>
 
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {/* PRIORITY FILTER */}
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
@@ -180,8 +176,7 @@ export default function AdminDashboard() {
             <div><b>Description:</b> {t.description}</div>
           </div>
 
-          <div style={{ display: "flex", gap: 24, marginBottom: 12 }}>
-            {/* Status */}
+          <div style={{ display: "flex", gap: 24 }}>
             <div>
               <label>Status</label><br />
               <select
@@ -192,22 +187,8 @@ export default function AdminDashboard() {
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
-
-              <span
-                style={{
-                  marginLeft: 8,
-                  padding: "2px 8px",
-                  borderRadius: 4,
-                  fontSize: 12,
-                  color: "#fff",
-                  background: statusColor(t.status),
-                }}
-              >
-                {t.status}
-              </span>
             </div>
 
-            {/* Priority */}
             <div>
               <label>Priority</label><br />
               <select
@@ -219,26 +200,11 @@ export default function AdminDashboard() {
                   <option key={p} value={p}>{p}</option>
                 ))}
               </select>
-
-              {t.priority && (
-                <span
-                  style={{
-                    marginLeft: 8,
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                    fontSize: 12,
-                    color: "#fff",
-                    background: priorityColor(t.priority),
-                  }}
-                >
-                  {t.priority}
-                </span>
-              )}
             </div>
           </div>
 
           {t.status === "Reassigned" && (
-            <div>
+            <div style={{ marginTop: 12 }}>
               <label>Reassign To</label><br />
               <select
                 value={t.assignedTo || ""}
