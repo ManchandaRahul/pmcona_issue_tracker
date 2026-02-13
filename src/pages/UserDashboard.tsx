@@ -35,16 +35,32 @@ const SUPPORT_TYPES = [
   "Enhancement",
   "Query",
 ];
+const thStyle: React.CSSProperties = {
+  border: "1px solid #d1d5db",
+  textAlign: "left",
+  fontWeight: 600,
+};
 
-// Status options (same as admin, user only views)
+const tdStyle: React.CSSProperties = {
+  border: "1px solid #e5e7eb",
+  verticalAlign: "top",
+};
 const STATUS_OPTIONS = ["New", "In Progress", "Reassigned", "Closed"];
+
+/* ===== TICKET ID ===== */
+const generateTicketId = (tickets: any[]) => {
+  const year = new Date().getFullYear();
+  return `PMCONA-${year}-${String(tickets.length + 1).padStart(4, "0")}`;
+};
 
 export default function UserDashboard() {
   const user = JSON.parse(localStorage.getItem("user")!);
 
   const [tickets, setTickets] = useState<any[]>([]);
   const [showMyTickets, setShowMyTickets] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("All"); // ✅ NEW
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const [businessUnit, setBusinessUnit] = useState("");
   const [module, setModule] = useState("");
@@ -75,16 +91,19 @@ export default function UserDashboard() {
       return;
     }
 
-    await addDoc(collection(db, "tickets"), {
-      date: today,
-      businessUnit,
-      module,
-      supportType,
-      description,
-      status: "New",
-      createdBy: user.email,
-      createdAt: new Date(),
-    });
+await addDoc(collection(db, "tickets"), {
+  ticketId: generateTicketId(tickets),
+  date: today,
+  businessUnit,
+  module,
+  supportType,
+  description,
+  status: "New",
+  priority: "Not Set",   // ✅ ADD THIS
+  createdBy: user.email,
+  createdAt: new Date(),
+});
+
 
     setBusinessUnit("");
     setModule("");
@@ -93,36 +112,41 @@ export default function UserDashboard() {
     setShowMyTickets(true);
   };
 
-  // ✅ FILTERED TICKETS (USER SIDE)
-  const filteredTickets =
-    statusFilter === "All"
-      ? tickets
-      : tickets.filter((t) => t.status === statusFilter);
+  const filteredTickets = tickets.filter((t) => {
+    if (statusFilter !== "All" && t.status !== statusFilter) return false;
+    if (fromDate && t.date < fromDate) return false;
+    if (toDate && t.date > toDate) return false;
+    return true;
+  });
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 20 }}>
+    <div style={{ maxWidth: 1000, margin: "0 auto", padding: 24 }}>
       {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 24,
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
         <h2>Support / Issue Tracker</h2>
-        <button
-          onClick={logout}
-          style={{
-            backgroundColor: "#dc2626",
-            color: "#ffffff",
-            padding: "8px 16px",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-          }}
-        >
-          Logout
-        </button>
+
+        {/* ✅ ADMIN-LIKE LOGOUT */}
+<button
+    onClick={logout}
+    style={{
+      all: "unset",
+      backgroundColor: "#dc2626",
+      color: "#ffffff",
+      padding: "8px 14px",
+      borderRadius: 4,
+      cursor: "pointer",
+      fontSize: 14,
+      fontFamily: "Arial, Helvetica, sans-serif",
+      lineHeight: "20px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+  Logout
+</button>
+
+
       </div>
 
       {/* CREATE TICKET */}
@@ -131,46 +155,31 @@ export default function UserDashboard() {
 
         <div style={{ maxWidth: 500 }}>
           <div style={{ marginBottom: 12 }}>
-            <label>Date: </label>
+            <label>Date:</label>
             <input type="date" value={today} disabled style={{ width: "100%" }} />
           </div>
 
           <div style={{ marginBottom: 12 }}>
             <label>Business Unit: </label>
-            <select
-              value={businessUnit}
-              onChange={(e) => setBusinessUnit(e.target.value)}
-            >
+            <select value={businessUnit} onChange={(e) => setBusinessUnit(e.target.value)}>
               <option value="">Select</option>
-              {BUSINESS_UNITS.map((b) => (
-                <option key={b}>{b}</option>
-              ))}
+              {BUSINESS_UNITS.map((b) => <option key={b}>{b}</option>)}
             </select>
           </div>
 
           <div style={{ marginBottom: 12 }}>
             <label>Module: </label>
-            <select
-              value={module}
-              onChange={(e) => setModule(e.target.value)}
-            >
+            <select value={module} onChange={(e) => setModule(e.target.value)}>
               <option value="">Select</option>
-              {MODULES.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
+              {MODULES.map((m) => <option key={m}>{m}</option>)}
             </select>
           </div>
 
           <div style={{ marginBottom: 12 }}>
             <label>Support Type: </label>
-            <select
-              value={supportType}
-              onChange={(e) => setSupportType(e.target.value)}
-            >
+            <select value={supportType} onChange={(e) => setSupportType(e.target.value)}>
               <option value="">Select</option>
-              {SUPPORT_TYPES.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
+              {SUPPORT_TYPES.map((s) => <option key={s}>{s}</option>)}
             </select>
           </div>
 
@@ -188,10 +197,10 @@ export default function UserDashboard() {
             onClick={submitTicket}
             style={{
               backgroundColor: "#16a34a",
-              color: "#ffffff",
-              padding: "10px 16px",
+              color: "#fff",
+              padding: "10px 18px",
               border: "none",
-              borderRadius: 4,
+              borderRadius: 6,
               cursor: "pointer",
             }}
           >
@@ -204,60 +213,63 @@ export default function UserDashboard() {
       <div style={{ border: "1px solid #ccc", padding: 24 }}>
         <div
           onClick={() => setShowMyTickets(!showMyTickets)}
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
-          }}
+          style={{ display: "flex", justifyContent: "space-between", cursor: "pointer" }}
         >
-          <h3 style={{ margin: 0 }}>My Tickets</h3>
+          <h3>My Tickets</h3>
           <span>{showMyTickets ? "▲" : "▼"}</span>
         </div>
 
-        {/* ✅ STATUS FILTER (ONLY WHEN EXPANDED) */}
         {showMyTickets && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ marginRight: 8 }}>Filter by Status:</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All">All</option>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {showMyTickets &&
-          filteredTickets.map((t) => (
-            <div
-              key={t.id}
-              style={{
-                border: "1px solid #999",
-                padding: 16,
-                marginBottom: 16,
-                background: "#f9f9f9",
-              }}
-            >
-              <div><b>Date:</b> {t.date}</div>
-              <div><b>Status:</b> {t.status}</div>
-              <div><b>Business Unit:</b> {t.businessUnit}</div>
-              <div><b>Module:</b> {t.module}</div>
-              <div><b>Support Type:</b> {t.supportType}</div>
-              <div><b>Description:</b> {t.description}</div>
+          <>
+            {/* FILTERS */}
+            <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="All">All Status</option>
+                {STATUS_OPTIONS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+              {/* <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} /> */}
             </div>
-          ))}
 
-        {showMyTickets && filteredTickets.length === 0 && (
-          <div style={{ fontSize: 13, color: "#666" }}>
-            No tickets found for selected status
-          </div>
+            {/* LIST VIEW */}
+{/* LIST VIEW */}
+<table
+  width="100%"
+  cellPadding={8}
+  style={{
+    borderCollapse: "collapse",
+    marginTop: 12,
+  }}
+>
+  <thead style={{ background: "#f3f4f6" }}>
+    <tr>
+      <th style={thStyle}>Ticket ID</th>
+      <th style={thStyle}>Date</th>
+      <th style={thStyle}>Status</th>
+      <th style={thStyle}>Module</th>
+      <th style={thStyle}>Support Type</th>
+      <th style={thStyle}>Description</th>
+      <th style={thStyle}>Closing Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredTickets.map((t) => (
+      <tr key={t.id}>
+        <td style={tdStyle}>{t.ticketId}</td>
+        <td style={tdStyle}>{t.date}</td>
+        <td style={tdStyle}>{t.status}</td>
+        <td style={tdStyle}>{t.module}</td>
+        <td style={tdStyle}>{t.supportType}</td>
+        <td style={tdStyle}>{t.description}</td>
+        <td style={tdStyle}>
+          {t.status === "Closed" ? t.resolutionRemarks || "-" : "-"}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+          </>
         )}
       </div>
     </div>
