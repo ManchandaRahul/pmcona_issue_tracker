@@ -214,8 +214,9 @@ export default function AdminDashboard() {
           >
             <div><b>Ticket ID:</b> {t.ticketId}</div>
             <div><b>Date:</b> {t.date}</div>
-            <div><b>User:</b> {t.createdBy}</div>
-            <div><b>BU:</b> {t.businessUnit}</div>
+            <div><b>User:</b> {t.createdBy?.split("@")[0]}
+</div>
+            <div><b>Business Unit:</b> {t.businessUnit}</div>
             <div><b>Module:</b> {t.module}</div>
             <div><b>Support Type:</b> {t.supportType}</div>
             <div><b>Description:</b> {t.description}</div>
@@ -268,27 +269,32 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            {/* Closing Remarks */}
-            {t.status !== "Closed" && (
-              <div style={{ marginTop: 12 }}>
-                <label>Closing Remarks</label>
-                <textarea
-                  rows={2}
-                  style={{ width: "100%" }}
-                  value={
-                    closingRemarks[t.id] ||
-                    t.resolutionRemarks ||
-                    ""
-                  }
-                  onChange={(e) =>
-                    setClosingRemarks({
-                      ...closingRemarks,
-                      [t.id]: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            )}
+
+{/* Closing Remarks */}
+{/* Closing Remarks */}
+<div style={{ marginTop: 12 }}>
+  <label>Closing Remarks</label>
+
+  {t.status === "Closed" ? (
+    <div style={{ padding: "6px 0", color: "#374151" }}>
+      {t.resolutionRemarks || "-"}
+    </div>
+  ) : (
+    <textarea
+      rows={2}
+      style={{ width: "100%" }}
+      value={closingRemarks[t.id] || ""}
+      onChange={(e) =>
+        setClosingRemarks({
+          ...closingRemarks,
+          [t.id]: e.target.value,
+        })
+      }
+    />
+  )}
+</div>
+
+
           </div>
         ))}
 
@@ -325,7 +331,8 @@ export default function AdminDashboard() {
         <tr key={t.id}>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.ticketId}</td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.date}</td>
-          <td style={{ border: "1px solid #e5e7eb" }}>{t.createdBy}</td>
+          <td style={{ border: "1px solid #e5e7eb" }}>{t.createdBy?.split("@")[0]}
+</td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.businessUnit}</td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.module}</td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.supportType}</td>
@@ -342,16 +349,38 @@ export default function AdminDashboard() {
           </td>
 
           {/* STATUS */}
-          <td style={{ border: "1px solid #e5e7eb" }}>
-            <select
-              value={t.status}
-              onChange={(e) => updateStatus(t.id, e.target.value)}
-            >
-              {STATUSES.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </td>
+         <td style={{ border: "1px solid #e5e7eb" }}>
+  <select
+    value={t.status}
+    onChange={(e) => updateStatus(t.id, e.target.value)}
+  >
+    {STATUSES.map((s) => (
+      <option key={s}>{s}</option>
+    ))}
+  </select>
+
+  {/* REASSIGN INLINE */}
+  {t.status === "Reassigned" && (
+    <div style={{ marginTop: 6 }}>
+      <select
+        value={t.assignedTo || ""}
+        onChange={(e) =>
+          updateAssignee(t.id, e.target.value)
+        }
+        style={{ width: "100%" }}
+      >
+        <option value="">Select Assignee</option>
+        {ASSIGNEES.map((a) => (
+          <option key={a} value={a}>
+            {a}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
+</td>
+
+          
 
           {/* PRIORITY */}
           <td style={{ border: "1px solid #e5e7eb" }}>

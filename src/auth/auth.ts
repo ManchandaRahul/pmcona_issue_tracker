@@ -1,11 +1,11 @@
 export type Role = "admin" | "user";
 
 const USERS = {
-  "admin@company.com": {
+  "admin": {
     password: "admin123",
     role: "admin" as Role,
   },
-  "user@company.com": {
+  "user": {
     password: "user123",
     role: "user" as Role,
   },

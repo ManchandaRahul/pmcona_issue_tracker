@@ -226,6 +226,7 @@ export default function UserDashboard() {
           <>
             {/* STATUS FILTER */}
             <div style={{ marginBottom: 16 }}>
+              Filter by: 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}

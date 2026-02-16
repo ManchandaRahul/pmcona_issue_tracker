@@ -61,7 +61,7 @@ export default function Login() {
           </label>
           <input
             type="email"
-            placeholder="user@company.com"
+            placeholder="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{
