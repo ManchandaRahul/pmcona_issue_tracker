@@ -58,6 +58,10 @@ const generateTicketId = (tickets: any[]) => {
 
 export default function UserDashboard() {
   const user = JSON.parse(localStorage.getItem("user")!);
+  const logout = () => {
+  localStorage.removeItem("user");
+  window.location.href = import.meta.env.BASE_URL;
+};
 
   const [tickets, setTickets] = useState<any[]>([]);
   const [showMyTickets, setShowMyTickets] = useState(false);
@@ -70,10 +74,7 @@ export default function UserDashboard() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    window.location.href = import.meta.env.BASE_URL;
-  };
+
 
   useEffect(() => {
     const q = query(
@@ -130,25 +131,9 @@ export default function UserDashboard() {
       >
         <h2>Support / Issue Tracker</h2>
 
-        <button
-          onClick={logout}
-          style={{
-            all: "unset",
-            backgroundColor: "#dc2626",
-            color: "#ffffff",
-            padding: "8px 14px",
-            borderRadius: 4,
-            cursor: "pointer",
-            fontSize: 14,
-            fontFamily: "Arial, Helvetica, sans-serif",
-            lineHeight: "20px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          Logout
-        </button>
+<button onClick={logout} className="logout-btn">
+    Logout
+  </button>
       </div>
 
       {/* CREATE TICKET */}
@@ -162,7 +147,7 @@ export default function UserDashboard() {
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <label>Business Unit:</label>
+            <label>Business Unit: </label>
             <select
               value={businessUnit}
               onChange={(e) => setBusinessUnit(e.target.value)}
@@ -175,7 +160,7 @@ export default function UserDashboard() {
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <label>Module:</label>
+            <label>Module: </label>
             <select value={module} onChange={(e) => setModule(e.target.value)}>
               <option value="">Select</option>
               {MODULES.map((m) => (
@@ -185,7 +170,7 @@ export default function UserDashboard() {
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <label>Support Type:</label>
+            <label>Support Type: </label>
             <select
               value={supportType}
               onChange={(e) => setSupportType(e.target.value)}
@@ -198,7 +183,7 @@ export default function UserDashboard() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label>Description</label>
+            <label>Description:</label>
             <textarea
               rows={4}
               value={description}

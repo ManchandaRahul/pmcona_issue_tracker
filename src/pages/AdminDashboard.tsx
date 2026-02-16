@@ -192,17 +192,10 @@ export default function AdminDashboard() {
             Download Excel
           </button>
 
-          <button
-            onClick={logout}
-            style={{
-              background: "#dc2626",
-              color: "#fff",
-              padding: "8px 14px",
-              border: "none",
-            }}
-          >
-            Logout
-          </button>
+<button onClick={logout} className="logout-btn">
+  Logout
+</button>
+
         </div>
       </div>
 
