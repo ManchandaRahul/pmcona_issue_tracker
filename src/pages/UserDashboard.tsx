@@ -36,6 +36,9 @@ const SUPPORT_TYPES = [
   "Query",
 ];
 
+
+
+
 const STATUS_OPTIONS = ["New", "In Progress", "Reassigned", "Closed"];
 
 /* ===== TABLE STYLES ===== */
@@ -57,6 +60,7 @@ const generateTicketId = (tickets: any[]) => {
 };
 
 export default function UserDashboard() {
+  const [raisedBy, setRaisedBy] = useState("");
   const user = JSON.parse(localStorage.getItem("user")!);
   const logout = () => {
   localStorage.removeItem("user");
@@ -88,7 +92,7 @@ export default function UserDashboard() {
   }, []);
 
   const submitTicket = async () => {
-    if (!businessUnit || !module || !supportType || !description) {
+    if (!raisedBy || !businessUnit || !module || !supportType || !description) {
       alert("Please fill all fields");
       return;
     }
@@ -96,6 +100,7 @@ export default function UserDashboard() {
     await addDoc(collection(db, "tickets"), {
       ticketId: generateTicketId(tickets),
       date: today,
+      raisedBy,
       businessUnit,
       module,
       supportType,
@@ -110,6 +115,7 @@ export default function UserDashboard() {
     setModule("");
     setSupportType("");
     setDescription("");
+    setRaisedBy("");
     setShowMyTickets(true);
   };
 
@@ -145,6 +151,16 @@ export default function UserDashboard() {
             <label>Date:</label>
             <input type="date" value={today} disabled style={{ width: "100%" }} />
           </div>
+          <div style={{ marginBottom: 12 }}>
+  <label>Raised By:</label>
+  <input
+    type="text"
+    value={raisedBy}
+    onChange={(e) => setRaisedBy(e.target.value)}
+    style={{ width: "100%" }}
+  />
+</div>
+
 
           <div style={{ marginBottom: 12 }}>
             <label>Business Unit: </label>
@@ -248,6 +264,7 @@ export default function UserDashboard() {
                 <tr>
                   <th style={thStyle}>Ticket ID</th>
                   <th style={thStyle}>Date</th>
+                  <th style={thStyle}>Raised By</th>
                   <th style={thStyle}>Status</th>
                   <th style={thStyle}>Module</th>
                   <th style={thStyle}>Support Type</th>
@@ -261,6 +278,7 @@ export default function UserDashboard() {
                   <tr key={t.id}>
                     <td style={tdStyle}>{t.ticketId}</td>
                     <td style={tdStyle}>{t.date}</td>
+                    <td style={tdStyle}>{t.raisedBy || "-"}</td>
                     <td style={tdStyle}>{t.status}</td>
                     <td style={tdStyle}>{t.module}</td>
                     <td style={tdStyle}>{t.supportType}</td>

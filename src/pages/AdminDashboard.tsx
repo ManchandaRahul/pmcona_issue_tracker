@@ -79,9 +79,11 @@ export default function AdminDashboard() {
 
   const downloadExcel = () => {
     const rows = filteredTickets.map((t) => ({
-      "Ticket ID": t.ticketId || "",
-      Date: t.date || "",
-      "Created By": t.createdBy || "",
+  "Ticket ID": t.ticketId || "",
+  Date: t.date || "",
+  "Raised By": t.raisedBy || "",
+  "Created By": t.createdBy?.split("@")[0] || "",
+
       "Business Unit": t.businessUnit || "",
       Module: t.module || "",
       "Support Type": t.supportType || "",
@@ -216,6 +218,8 @@ export default function AdminDashboard() {
             <div><b>Date:</b> {t.date}</div>
             <div><b>User:</b> {t.createdBy?.split("@")[0]}
 </div>
+<div><b>Raised By:</b> {t.raisedBy || "-"}</div>
+
             <div><b>Business Unit:</b> {t.businessUnit}</div>
             <div><b>Module:</b> {t.module}</div>
             <div><b>Support Type:</b> {t.supportType}</div>
@@ -315,6 +319,7 @@ export default function AdminDashboard() {
       <tr>
         <th style={{ border: "1px solid #d1d5db" }}>Ticket ID</th>
         <th style={{ border: "1px solid #d1d5db" }}>Date</th>
+        <th style={{ border: "1px solid #d1d5db" }}>Raised By</th>
         <th style={{ border: "1px solid #d1d5db" }}>User</th>
         <th style={{ border: "1px solid #d1d5db" }}>Business Unit</th>
         <th style={{ border: "1px solid #d1d5db" }}>Module</th>
@@ -331,6 +336,10 @@ export default function AdminDashboard() {
         <tr key={t.id}>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.ticketId}</td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.date}</td>
+          <td style={{ border: "1px solid #e5e7eb" }}>
+  {t.raisedBy || "-"}
+</td>
+
           <td style={{ border: "1px solid #e5e7eb" }}>{t.createdBy?.split("@")[0]}
 </td>
           <td style={{ border: "1px solid #e5e7eb" }}>{t.businessUnit}</td>
