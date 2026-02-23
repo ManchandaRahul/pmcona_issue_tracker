@@ -1,26 +1,516 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-button.logout-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background-color: #dc2626 !important;
-  color: #ffffff !important;
-  padding: 8px 14px !important;
-  border-radius: 4px !important;
-  font-size: 14px !important;
-  font-family: Arial, Helvetica, sans-serif !important;
-  line-height: 20px !important;
-  cursor: pointer !important;
-  white-space: nowrap !important;
-  border: none !important;
-  outline: none !important;
-  height: 36px !important;
-  min-width: 80px !important;
+/* ================================================
+   BASE & RESET
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-button.logout-btn:hover {
-  background-color: #b91c1c !important;
+body {
+  margin: 0;
+  background: #f8f9fc;
+  color: #1f2937;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ================================================
+   LAYOUT & HEADER
+   ================================================ */
+.page-wrapper {
+  min-height: 100vh;
+  background: #f8f9fc;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.app-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Controls row in header */
+.app-header > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ================================================
+   FILTER / CONTROL BAR (in header)
+   ================================================ */
+small {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* ================================================
+   CARDS (admin-card)
+   ================================================ */
+.admin-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Status left border accent */
+.admin-card[data-status="New"]         { border-left: 4px solid #3b82f6; }
+.admin-card[data-status="In Progress"] { border-left: 4px solid #f59e0b; }
+.admin-card[data-status="Reassigned"]  { border-left: 4px solid #8b5cf6; }
+.admin-card[data-status="Closed"]      { border-left: 4px solid #10b981; }
+
+.admin-card-header {
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+.admin-card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.admin-card-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem 1.25rem;
+  padding: 1rem 1.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.admin-card-meta span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Description block */
+.admin-card > div:not(.admin-card-header):not(.admin-card-meta):first-of-type {
+  padding: 0 1.25rem 1rem;
+  font-size: 0.925rem;
+  line-height: 1.55;
+  color: #374151;
+}
+
+.admin-card-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f3f4f6;
+  background: #fafafa;
+}
+
+.admin-card-controls > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+}
+
+.admin-card-controls label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-card-remarks,
+.admin-card-history {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.admin-card-history b {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+/* ================================================
+   TABLE (List View)
+   ================================================ */
+.table-wrap {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+table {
+  width: 100%;
+  min-width: 1100px;           /* ← forces horizontal scroll when needed */
+  border-collapse: collapse;
+}
+
+.th-cell {
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.td-cell {
+  padding: 1rem;
+  font-size: 0.925rem;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+tbody tr:hover .td-cell {
+  background: #f8fafc;
+}
+
+/* ================================================
+   FORM CONTROLS & SELECTS
+   ================================================ */
+.form-input,
+.form-input select,
+.form-input textarea {
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-input:focus,
+.form-input select:focus,
+.form-input textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* Compact selects in table */
+select.form-input {
+  min-width: 100px;
+  max-width: 180px;
+}
+
+/* ================================================
+   BUTTONS
+   ================================================ */
+.btn-blue {
+  background: #2563eb;
+  color: white;
+  font-weight: 500;
+  padding: 0.55rem 1.2rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.btn-blue:hover {
+  background: #1d4ed8;
+}
+
+.logout-btn {
+  color: #ef4444;
+  background: transparent;
+  border: 1.5px solid #ef4444;
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* ================================================
+   VIEW TOGGLE
+   ================================================ */
+.view-toggle-wrap {
+  background: #e5e7eb;
+  border-radius: 8px;
+  padding: 3px;
+  display: inline-flex;
+}
+
+.view-toggle-btn {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.view-toggle-btn.active {
+  background: white;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+@media (max-width: 1024px) {
+  .admin-card-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .admin-card-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .admin-card-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ────────────────────────────────────────────────
+   USER DASHBOARD FIXES
+───────────────────────────────────────────────── */
+
+/* Prevent white background leak when scrolling table horizontally */
+.tickets-table-wrap {
+  overflow-x: auto;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  margin: 16px 0 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Make Submit Ticket button look clean and modern */
+.btn-green {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #10b981;           /* emerald green */
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;         /* pill shape */
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.25);
+  margin-top: 12px;
+}
+
+.btn-green:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16,185,129,0.35);
+}
+
+.btn-green:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16,185,129,0.2);
+}
+
+/* Better spacing – make My Tickets feel like a separate section */
+.card + .card {
+  margin-top: 40px;              /* bigger gap between Create Ticket and My Tickets */
+}
+
+/* My Tickets collapsible header – more prominent */
+.card > div[style*="justify-content: space-between"] {
+  padding: 1.25rem 1.5rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+/* Filter row – better positioning and breathing room */
+div[style*="margin-bottom: 16px"][style*="margin-top: 20px"] {
+  padding: 0 1.5rem;
+  margin: 1.5rem 0 1.25rem !important;
+}
+
+/* Make table feel less cramped overall */
+.tickets-table th,
+.tickets-table td {
+  padding: 12px 14px !important;
+}
+
+/* Optional: make description column more readable */
+.tickets-table td:nth-child(7) {   /* Description column */
+  max-width: 280px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+
+/* ────────────────────────────────────────────────
+   USER DASHBOARD – MOBILE-FRIENDLY FORM LAYOUT
+───────────────────────────────────────────────── */
+
+.card form > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.card .form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.card input.form-input,
+.card select.form-input,
+.card textarea.form-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (min-width: 640px) {
+  .card form > div {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .card .form-label {
+    flex: 0 0 140px;
+    margin-bottom: 0;
+  }
+
+  .card input.form-input,
+  .card select.form-input {
+    flex: 1;
+  }
+
+  .card textarea.form-input {
+    flex: 1 1 auto;
+  }
+}
+
+.btn-green {
+  width: 100%;
+  max-width: 240px;
+  margin: 1.5rem auto 0;
+  display: block;
+}
+
+/* ────────────────────────────────────────────────
+   ADMIN CARD – FIXED DESCRIPTION ALIGNMENT
+───────────────────────────────────────────────── */
+
+.admin-card > div:not(.admin-card-header):not(.admin-card-meta):not(.admin-card-controls):not(.admin-card-remarks):not(.admin-card-history) {
+  padding: 0 1.25rem 1.25rem;
+  margin-top: -0.25rem;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.admin-card > div:not(.admin-card-header):not(.admin-card-meta) > span {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Consistent padding across card sections */
+.admin-card-controls,
+.admin-card-remarks,
+.admin-card-history {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* Small refinement: better spacing in meta grid on mobile */
+@media (max-width: 640px) {
+  .admin-card-meta {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translate(-50%, -10px); }
+  10%  { opacity: 1; transform: translate(-50%, 0); }
+  90%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
 }

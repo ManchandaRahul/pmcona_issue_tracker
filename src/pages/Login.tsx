@@ -34,84 +34,92 @@ export default function Login() {
         justifyContent: "center",
       }}
     >
-      <div
+<div
+  style={{
+    width: 360,
+    backgroundColor: "#ffffff",
+    border: "1px solid #d1d5db",
+    padding: 24,
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+  }}
+>
+  <h2 style={{ marginBottom: 8 }}>Support / Issue Tracker</h2>
+  <p style={{ marginBottom: 20, color: "#555", fontSize: 14 }}>
+    Secure Login
+  </p>
+
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      onLogin();
+    }}
+  >
+    {/* Email */}
+    <div style={{ marginBottom: 12 }}>
+      <label
         style={{
-          width: 360,
-          backgroundColor: "#ffffff",
-          border: "1px solid #d1d5db",
-          padding: 24,
-          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+          display: "block",
+          fontSize: 13,
+          marginBottom: 4,
         }}
       >
-        <h2 style={{ marginBottom: 8 }}>Support / Issue Tracker</h2>
-        <p style={{ marginBottom: 20, color: "#555", fontSize: 14 }}>
-          Secure Login
-        </p>
+        Email
+      </label>
+      <input
+        type="text"
+        placeholder="username"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 8,
+          border: "1px solid #9ca3af",
+        }}
+      />
+    </div>
 
-        {/* Email */}
-        <div style={{ marginBottom: 12 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              marginBottom: 4,
-            }}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            placeholder="username"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 8,
-              border: "1px solid #9ca3af",
-            }}
-          />
-        </div>
+    {/* Password */}
+    <div style={{ marginBottom: 20 }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: 13,
+          marginBottom: 4,
+        }}
+      >
+        Password
+      </label>
+      <input
+        type="password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 8,
+          border: "1px solid #9ca3af",
+        }}
+      />
+    </div>
 
-        {/* Password */}
-        <div style={{ marginBottom: 20 }}>
-          <label
-            style={{
-              display: "block",
-              fontSize: 13,
-              marginBottom: 4,
-            }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 8,
-              border: "1px solid #9ca3af",
-            }}
-          />
-        </div>
+    {/* Login Button */}
+    <button
+      type="submit"
+      style={{
+        width: "100%",
+        padding: "10px 0",
+        backgroundColor: "#2563eb",
+        color: "#ffffff",
+        border: "none",
+        fontWeight: 600,
+        cursor: "pointer",
+      }}
+    >
+      Login
+    </button>
+  </form>
+</div>
 
-        {/* Login Button */}
-        <button
-          onClick={onLogin}
-          style={{
-            width: "100%",
-            padding: "10px 0",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            border: "none",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Login
-        </button>
-      </div>
     </div>
   );
 }
