@@ -25,20 +25,12 @@ body {
 }
 
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #e5e7eb;
-  padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: flex-start;   /* 🔥 Fix */
+  gap: 12px;
 }
+
 
 .app-header h1 {
   font-size: 1.25rem;
@@ -48,13 +40,7 @@ body {
   white-space: nowrap;
 }
 
-/* Controls row in header */
-.app-header > div:last-child {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
+
 
 /* ================================================
    FILTER / CONTROL BAR (in header)
