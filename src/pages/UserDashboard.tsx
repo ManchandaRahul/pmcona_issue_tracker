@@ -154,10 +154,16 @@ const submitTicket = async () => {
   return (
     <div className="page-wrapper">
       {/* HEADER */}
-      <div className="app-header">
-        <h2>Support / Issue Tracker</h2>
-        <button onClick={logout} className="logout-btn">Logout</button>
-      </div>
+     <div className="app-header">
+  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+    <h2 style={{ margin: 0 }}>Support / Issue Tracker</h2>
+  </div>
+
+  <button onClick={logout} className="logout-btn">
+    Logout
+  </button>
+</div>
+
 
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: 24 }}>
 

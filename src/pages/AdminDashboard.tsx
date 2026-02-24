@@ -103,33 +103,68 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
     });
   };
 
-  const updateAssignee = async (ticketId: string, assignee: string) => {
-    await updateDoc(doc(db, "tickets", ticketId), {
-      assignedTo: assignee,
-      updatedAt: new Date(),
-    });
+const updateAssignee = async (ticketId: string, assignee: string) => {
+  const ticket = tickets.find((t) => t.id === ticketId);
+  if (!ticket) return;
+  const remark = closingRemarks[ticketId] || "";
+  const historyEntry = {
+    status: "Reassigned",
+    remark,
+    changedBy: admin.email,
+    changedAt: new Date().toISOString(),
   };
+
+  const updatedHistory = [
+    ...(ticket.history || []),
+    historyEntry,
+  ];
+
+  await updateDoc(doc(db, "tickets", ticketId), {
+    status: "Reassigned",     
+    assignedTo: assignee,     
+    history: updatedHistory,  
+    updatedAt: new Date(),
+  });
+};
+
 
   /* ================= EXCEL DOWNLOAD ================= */
 
   const downloadExcel = () => {
-    const rows = filteredTickets.map((t) => ({
-  "Ticket ID": t.ticketId || "",
-  Date: t.date || "",
-  "Raised By": t.raisedBy || "",
-  "Created By": t.createdBy?.split("@")[0] || "",
+const rows = filteredTickets.map((t) => {
+  const latestHistory =
+    t.history && t.history.length > 0
+      ? t.history[t.history.length - 1]
+      : null;
 
-      "Business Unit": t.businessUnit || "",
-      Module: t.module || "",
-      "Support Type": t.supportType || "",
-      Description: t.description || "",
-      Status: t.status || "",
-      Priority: t.priority || "Not Set",
-      "Assigned To": t.assignedTo || "",
-      "Resolved By": t.resolvedBy || "",
-      "Resolved Date": t.resolvedDate || "",
-      "Resolution Remarks": t.resolutionRemarks || "",
-    }));
+  return {
+    "Ticket ID": t.ticketId || "",
+    Date: t.date || "",
+    "Raised By": t.raisedBy || "",
+    "Created By": t.createdBy?.split("@")[0] || "",
+
+    "Business Unit": t.businessUnit || "",
+    Module: t.module || "",
+    "Support Type": t.supportType || "",
+    Description: t.description || "",
+
+    Status: t.status || "",
+    Priority: t.priority || "Not Set",
+
+    "Reassigned To":
+  t.status === "Reassigned" ? (t.assignedTo || "") : "",
+
+
+    "Latest Status": latestHistory?.status || "",
+    "Latest Remark": latestHistory?.remark || "",
+    "Last Updated By": latestHistory?.changedBy?.split("@")[0] || "",
+    "Last Updated At": latestHistory?.changedAt || "",
+
+    "Resolved By": t.resolvedBy || "",
+    "Resolved Date": t.resolvedDate || "",
+  };
+});
+
 
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -151,77 +186,86 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
   return (
     <div className="page-wrapper">
       {/* HEADER */}
-      <div className="app-header">
-        <h1>All Tickets</h1>
+<div className="app-header">
+  <h1>All Tickets</h1>
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          {/* Date Filter */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <small>From</small>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="form-input"
-              style={{ width: "auto" }}
-            />
-          </div>
+<div style={{
+  display: "flex",
+  gap: 12,
+  alignItems: "center",
+  flexWrap: "nowrap",           // ← the most important change
+  flex: 1,
+  justifyContent: "flex-end"
+}}>
+    {/* Date filters */}
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <small>From</small>
+      <input
+        type="date"
+        value={fromDate}
+        onChange={(e) => setFromDate(e.target.value)}
+        className="form-input"
+        style={{ width: "auto" }}
+      />
+    </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <small>To</small>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="form-input"
-              style={{ width: "auto" }}
-            />
-          </div>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <small>To</small>
+      <input
+        type="date"
+        value={toDate}
+        onChange={(e) => setToDate(e.target.value)}
+        className="form-input"
+        style={{ width: "auto" }}
+      />
+    </div>
 
-          {/* Priority Filter */}
-          Sort by:
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="form-input"
-            style={{ width: "auto" }}
-          >
-<option value="All">All Priorities</option>
-{PRIORITIES.map((p) => (
-  <option key={p} value={p}>{p}</option>
-))}
-          </select>
+    {/* Sort by */}
+    Sort by:
+    <select
+      value={priorityFilter}
+      onChange={(e) => setPriorityFilter(e.target.value)}
+      className="form-input"
+      style={{ width: "auto" }}
+    >
+      <option value="All">All Priorities</option>
+      {PRIORITIES.map((p) => (
+        <option key={p} value={p}>{p}</option>
+      ))}
+    </select>
 
-          {/* View Toggle */}
-          <div className="view-toggle-wrap">
-            <button
-              onClick={() => setViewMode("card")}
-              className={`view-toggle-btn ${viewMode === "card" ? "active" : "inactive"}`}
-            >
-              Card View
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`view-toggle-btn ${viewMode === "list" ? "active" : "inactive"}`}
-            >
-              List View
-            </button>
-          </div>
+    {/* View toggle */}
+    <div className="view-toggle-wrap">
+      <button
+        onClick={() => setViewMode("card")}
+        className={`view-toggle-btn ${viewMode === "card" ? "active" : "inactive"}`}
+      >
+        Card View
+      </button>
+      <button
+        onClick={() => setViewMode("list")}
+        className={`view-toggle-btn ${viewMode === "list" ? "active" : "inactive"}`}
+      >
+        List View
+      </button>
+    </div>
 
-          {/* Actions */}
-          <button
-            onClick={downloadExcel}
-            className="btn-blue"
-          >
-            Download Excel
-          </button>
+    {/* Action buttons – now next to each other */}
+    <button
+      onClick={downloadExcel}
+      className="btn-blue"
+    >
+      Download Excel
+    </button>
 
-<button onClick={logout} className="logout-btn">
-  Logout
-</button>
-
-        </div>
-      </div>
+    <button 
+      onClick={logout} 
+      className="logout-btn"
+    >
+      Logout
+    </button>
+  </div>
+</div>
 
       <div style={{ padding: 24 }}>
 

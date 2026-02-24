@@ -27,10 +27,14 @@ body {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start;   /* 🔥 Fix */
-  gap: 12px;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 1.5rem;                    /* space between title and controls */
+  flex-wrap: nowrap;              /* ← important: prevent wrapping on desktop */
+  min-height: 64px;               /* gives consistent height */
 }
-
 
 .app-header h1 {
   font-size: 1.25rem;
@@ -38,9 +42,105 @@ body {
   color: #111827;
   margin: 0;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
+/* The container that holds From, To, Sort by, view toggle, buttons */
+.app-header > div[style*="display: flex"][style*="gap: 10"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;           /* slightly bigger gap looks cleaner */
+  flex-wrap: nowrap !important;   /* ← force single line */
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;                   /* allows shrinking when needed */
+}
 
+/* Make sure small elements don't force wrapping */
+.app-header small {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.app-header input[type="date"].form-input,
+.app-header select.form-input {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  height: 34px;                   /* consistent height helps alignment */
+  min-width: 130px;
+}
+
+/* View toggle - make it more compact */
+.view-toggle-wrap {
+  padding: 3px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  display: flex;
+  font-size: 0.85rem;
+}
+
+.view-toggle-btn {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+/* Buttons - keep them compact */
+.btn-blue,
+.logout-btn {
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  height: 34px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ────────────────────────────────────────────────
+   When screen gets too small → allow wrapping
+───────────────────────────────────────────────── */
+@media (max-width: 1150px) {          /* adjust this breakpoint to taste */
+  .app-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .app-header > div[style*="display: flex"][style*="gap: 10"] {
+    flex-wrap: wrap !important;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 0.5rem;
+  }
+
+  /* Optional: make date inputs full width on small screens */
+  .app-header input[type="date"].form-input {
+    min-width: 48%;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-header h1 {
+    align-self: flex-start;
+  }
+
+  .app-header > div[style*="display: flex"][style*="gap: 10"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .view-toggle-wrap,
+  .btn-blue,
+  .logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
 /* ================================================
    FILTER / CONTROL BAR (in header)
@@ -248,21 +348,23 @@ select.form-input {
 }
 
 .logout-btn {
-  color: #ef4444;
   background: transparent;
   border: 1.5px solid #ef4444;
+  color: #ef4444;
   font-weight: 500;
-  padding: 0.45rem 1rem;
+  padding: 0.4rem 1rem;
   border-radius: 9999px;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
 }
 
 .logout-btn:hover {
   background: #ef4444;
   color: white;
+  box-shadow: 0 4px 10px rgba(239,68,68,0.25);
 }
+
 
 /* ================================================
    VIEW TOGGLE
