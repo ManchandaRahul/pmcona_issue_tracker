@@ -65,7 +65,17 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
   const ticket = tickets.find((t) => t.id === ticketId);
   if (!ticket) return;
 
-  const remark = closingRemarks[ticketId] || ticket.resolutionRemarks || "";
+  let remark = closingRemarks[ticketId] || ticket.resolutionRemarks || "";
+
+  // ── Only when changing TO "Reassigned" ──
+if (newStatus === "Reassigned") {
+    // Still update status, but do NOT add history here
+    await updateDoc(doc(db, "tickets", ticketId), {
+      status: newStatus,
+      updatedAt: new Date(),
+    });
+    return;
+  }
 
   const historyEntry = {
     status: newStatus,
@@ -93,6 +103,8 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
   }
 
   await updateDoc(doc(db, "tickets", ticketId), payload);
+
+
 };
 
 
@@ -106,43 +118,30 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
 const updateAssignee = async (ticketId: string, assignee: string) => {
   const ticket = tickets.find((t) => t.id === ticketId);
   if (!ticket) return;
+  if (ticket.assignedTo === (assignee || null)) return;
 
-  // Use existing remark if the admin typed something, otherwise use reassignment message
   const userRemark = closingRemarks[ticketId] || ticket.resolutionRemarks || "";
-  const reassignmentText = assignee ? `Reassigned to ${assignee}:` : "Reassignment removed";
-
-  // If admin added their own remark → combine them
-  const finalRemark = userRemark.trim() 
-    ? `${reassignmentText}\n${userRemark}` 
-    : reassignmentText;
 
   const historyEntry = {
     status: "Reassigned",
-    remark: finalRemark,
+    remark: userRemark.trim() 
+      ? `Assigned to ${assignee || "nobody"}: ${userRemark}`
+      : `Assigned to ${assignee || "nobody"}`,
     changedBy: admin.email,
     changedAt: new Date().toISOString(),
   };
-
   const updatedHistory = [
     ...(ticket.history || []),
     historyEntry,
   ];
 
   await updateDoc(doc(db, "tickets", ticketId), {
-    status: "Reassigned",
-    assignedTo: assignee || null,   // allow clearing
-    history: updatedHistory,
+    status: "Reassigned",     
+    assignedTo: assignee,     
+    history: updatedHistory,  
     updatedAt: new Date(),
   });
-
-  // Optional: clear local buffer after save
-  setClosingRemarks((prev) => {
-    const next = { ...prev };
-    delete next[ticketId];
-    return next;
-  });
 };
-
 
   /* ================= EXCEL DOWNLOAD ================= */
 
@@ -339,7 +338,10 @@ const rows = filteredTickets.map((t) => {
                 <label>Status</label>
                 <select
                   value={t.status}
-                  onChange={(e) => updateStatus(t.id, e.target.value)}
+                  onChange={(e) =>{
+                    const newStatus = e.target.value; // ── Prevent duplicate logging when status is already "Reassigned" ──
+    if (newStatus === t.status) return;                     // no change at all
+    if (newStatus === "Reassigned" && t.status === "Reassigned") return; updateStatus(t.id, e.target.value)}}
                   className="form-input"
                   style={{ width: "auto" }}
                 >
