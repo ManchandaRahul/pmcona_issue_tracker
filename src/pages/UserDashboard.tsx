@@ -329,160 +329,118 @@ const submitTicket = async () => {
 
             {/* LIST VIEW */}
             
-            <table
-              className="tickets-table"
-              width="100%"
-              cellPadding={8}
-              style={{ borderCollapse: "collapse", marginTop: 12 }}
-            >
-              <thead style={{ background: "#f3f4f6" }}>
-                <tr>
-<th style={thStyle}>
-  {/* <InfoIcon text="Unique ticket reference ID" /> */}
-    Ticket ID
-</th>
+<table
+  className="tickets-table"
+  width="100%"
+  cellPadding={8}
+  style={{ borderCollapse: "collapse", marginTop: 12 }}
+>
+  <thead style={{ background: "#f3f4f6" }}>
+    <tr>
+      <th style={thStyle}>Ticket ID</th>
+      <th style={thStyle} title="Date the ticket was created">Date</th>
+      <th style={thStyle} title="Person who reported the issue">Raised By</th>
+      <th style={thStyle}>Status</th>
+      <th style={thStyle}>Assigned To</th>           {/* ← added here */}
+      <th style={thStyle}>Business Unit</th>
+      <th style={thStyle} title="Module related to the issue">Module</th>
+      <th style={thStyle} title="Type of support required">Support Type</th>
+      <th style={thStyle} title="Description provided by the user">Description</th>
+      <th style={thStyle}>Remarks</th>
+      <th style={thStyle} title="Complete log of status updates and remarks">
+        Status and log messages
+      </th>
+    </tr>
+  </thead>
 
-                  <th style={thStyle} title="Date the ticket was created">
-  Date
-</th>
-
-                  <th style={thStyle} title="Person who reported the issue">
-  Raised By
-</th>
-<th style={thStyle}>
-  {/* <InfoIcon text="Current status of the ticket" /> */}
-    Status
-</th>
-<th style={thStyle}>Business Unit</th>
-
-                  <th style={thStyle} title="Module related to the issue">
-  Module
-</th>
-                  <th style={thStyle} title="Type of support required">
-  Support Type
-</th> 
-                  <th style={thStyle} title="Description provided by the user">
-  Description
-</th>
-<th style={thStyle}>
-  {/* <InfoIcon text="Final remark when ticket is closed" /> */}
-  Remarks
-</th>
-
-<th style={thStyle} title="Complete log of status updates and remarks">
-  Status and log messages
-</th>
-
-                </tr>
-              </thead>
-
-<tbody>
-  {filteredTickets.map((t) => (
-    <>
-      {/* MAIN ROW */}
-      <tr key={t.id}>
-        <td style={tdStyle}>{t.ticketId}</td>
-        <td style={tdStyle}>{t.date}</td>
-        <td style={tdStyle}>{t.raisedBy || "-"}</td>
-        <td style={tdStyle}>{t.status}</td>
-        <td style={tdStyle}>{t.businessUnit || "-"}</td>
-        <td style={tdStyle}>{t.module}</td>
-        <td style={tdStyle}>{t.supportType}</td>
-        <td style={tdStyle}>{t.description}</td>
-        <td style={tdStyle}>
-          {t.status === "Closed"
-            ? t.resolutionRemarks || "-"
-            : "-"}
-        </td>
-
-        {/* HISTORY SUMMARY COLUMN */}
-        <td style={tdStyle}>
-          {t.history && t.history.length > 0 ? (
-            <>
-              <div>
-                <b>{t.history[t.history.length - 1].status}</b>:{" "}
-                {t.history[t.history.length - 1].remark || "-"}
-              </div>
-
-              <div style={{ fontSize: 12, color: "#6b7280" }}>
-                {t.history.length} updates
-              </div>
-
-              <button
-                onClick={() =>
-                  setOpenHistory(
-                    openHistory === t.id ? null : t.id
-                  )
-                }
-                style={{
-                  marginTop: 4,
-                  fontSize: 12,
-                  color: "#2563eb",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
-              >
-                {openHistory === t.id
-                  ? "Hide history"
-                  : "View history"}
-              </button>
-            </>
-          ) : (
-            "-"
-          )}
-        </td>
-      </tr>
-
-      {/* EXPANDABLE HISTORY ROW */}
-      {openHistory === t.id && t.history && (
-        <tr>
-          <td
-            colSpan={9}
-            style={{
-              background: "#f9fafb",
-              padding: 12,
-            }}
-          >
-            {t.history.map((h: any, index: number) => (
-              <div
-                key={index}
-                style={{
-                  borderLeft: "3px solid #2563eb",
-                  paddingLeft: 10,
-                  marginBottom: 8,
-                }}
-              >
-                <div style={{ fontWeight: 600 }}>
-                  {h.status}
+  <tbody>
+    {filteredTickets.map((t) => (
+      <>
+        {/* MAIN ROW */}
+        <tr key={t.id}>
+          <td style={tdStyle}>{t.ticketId}</td>
+          <td style={tdStyle}>{t.date}</td>
+          <td style={tdStyle}>{t.raisedBy || "-"}</td>
+          <td style={tdStyle}>{t.status}</td>
+          <td style={tdStyle}>
+            {t.assignedTo || "—"}
+          </td>
+          <td style={tdStyle}>{t.businessUnit || "-"}</td>
+          <td style={tdStyle}>{t.module}</td>
+          <td style={tdStyle}>{t.supportType}</td>
+          <td style={tdStyle}>{t.description}</td>
+          <td style={tdStyle}>
+            {t.status === "Closed" ? t.resolutionRemarks || "-" : "-"}
+          </td>
+          <td style={tdStyle}>
+            {t.history && t.history.length > 0 ? (
+              <>
+                <div>
+                  <b>{t.history[t.history.length - 1].status}</b>:{" "}
+                  {t.history[t.history.length - 1].remark || "-"}
                 </div>
 
-                <div style={{ fontSize: 13 }}>
-                  {h.remark || "-"}
+                <div style={{ fontSize: 12, color: "#6b7280" }}>
+                  {t.history.length} updates
                 </div>
 
-                <div
+                <button
+                  onClick={() =>
+                    setOpenHistory(openHistory === t.id ? null : t.id)
+                  }
                   style={{
-                    fontSize: 11,
-                    color: "#6b7280",
+                    marginTop: 4,
+                    fontSize: 12,
+                    color: "#2563eb",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
                   }}
                 >
-                  {h.changedBy?.split("@")[0]} •{" "}
-                  {new Date(
-                    h.changedAt
-                  ).toLocaleString()}
-                </div>
-              </div>
-            ))}
+                  {openHistory === t.id ? "Hide history" : "View history"}
+                </button>
+              </>
+            ) : (
+              "-"
+            )}
           </td>
         </tr>
-      )}
-    </>
-  ))}
-</tbody>
 
-            </table>
+        {/* EXPANDABLE HISTORY ROW */}
+        {openHistory === t.id && t.history && (
+          <tr>
+            <td
+              colSpan={11}   // ← updated to 11 columns
+              style={{
+                background: "#f9fafb",
+                padding: 12,
+              }}
+            >
+              {t.history.map((h: any, index: number) => (
+                <div
+                  key={index}
+                  style={{
+                    borderLeft: "3px solid #2563eb",
+                    paddingLeft: 10,
+                    marginBottom: 8,
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>{h.status}</div>
+                  <div style={{ fontSize: 13 }}>{h.remark || "-"}</div>
+                  <div style={{ fontSize: 11, color: "#6b7280" }}>
+                    {h.changedBy?.split("@")[0]} •{" "}
+                    {new Date(h.changedAt).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </td>
+          </tr>
+        )}
+      </>
+    ))}
+  </tbody>
+</table>
 
             {/* MOBILE CARD VIEW */}
             <div className="tickets-cards" style={{ marginTop: 12 }}>

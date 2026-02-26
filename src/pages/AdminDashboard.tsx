@@ -106,10 +106,19 @@ const updateStatus = async (ticketId: string, newStatus: string) => {
 const updateAssignee = async (ticketId: string, assignee: string) => {
   const ticket = tickets.find((t) => t.id === ticketId);
   if (!ticket) return;
-  const remark = closingRemarks[ticketId] || "";
+
+  // Use existing remark if the admin typed something, otherwise use reassignment message
+  const userRemark = closingRemarks[ticketId] || ticket.resolutionRemarks || "";
+  const reassignmentText = assignee ? `Reassigned to ${assignee}:` : "Reassignment removed";
+
+  // If admin added their own remark → combine them
+  const finalRemark = userRemark.trim() 
+    ? `${reassignmentText}\n${userRemark}` 
+    : reassignmentText;
+
   const historyEntry = {
     status: "Reassigned",
-    remark,
+    remark: finalRemark,
     changedBy: admin.email,
     changedAt: new Date().toISOString(),
   };
@@ -120,10 +129,17 @@ const updateAssignee = async (ticketId: string, assignee: string) => {
   ];
 
   await updateDoc(doc(db, "tickets", ticketId), {
-    status: "Reassigned",     
-    assignedTo: assignee,     
-    history: updatedHistory,  
+    status: "Reassigned",
+    assignedTo: assignee || null,   // allow clearing
+    history: updatedHistory,
     updatedAt: new Date(),
+  });
+
+  // Optional: clear local buffer after save
+  setClosingRemarks((prev) => {
+    const next = { ...prev };
+    delete next[ticketId];
+    return next;
   });
 };
 
@@ -368,27 +384,20 @@ const rows = filteredTickets.map((t) => {
 
             {/* Closing Remarks */}
             {/* Closing Remarks */}
-            <div className="admin-card-remarks">
-              <label>Remarks</label>
-
-              {t.status === "Closed" ? (
-                <div style={{ padding: "6px 0", color: "#374151", fontSize: 13 }}>
-                  {t.resolutionRemarks || "-"}
-                </div>
-              ) : (
-                <textarea
-                  rows={2}
-                  className="form-input"
-                  value={closingRemarks[t.id] || ""}
-                  onChange={(e) =>
-                    setClosingRemarks({
-                      ...closingRemarks,
-                      [t.id]: e.target.value,
-                    })
-                  }
-                />
-              )}
-            </div>
+<div className="admin-card-remarks">
+  <label>Remarks</label>
+  <textarea
+    rows={3}
+    className="form-input"
+    value={closingRemarks[t.id] ?? t.resolutionRemarks ?? ""}
+    onChange={(e) =>
+      setClosingRemarks({
+        ...closingRemarks,
+        [t.id]: e.target.value,
+      })
+    }
+  />
+</div>
 {/* <button
   onClick={() =>
     updateStatus(
@@ -466,86 +475,75 @@ const rows = filteredTickets.map((t) => {
 
       <tbody>
         {filteredTickets.map((t) => (
-          <tr key={t.id}>
-            <td className="td-cell" style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{t.ticketId}</td>
-            <td className="td-cell" style={{ whiteSpace: "nowrap" }}>{t.date}</td>
-            <td className="td-cell">{t.raisedBy || "-"}</td>
-            <td className="td-cell">{t.createdBy?.split("@")[0]}</td>
-            <td className="td-cell">{t.businessUnit}</td>
-            <td className="td-cell">{t.module}</td>
-            <td className="td-cell">{t.supportType}</td>
+<tr key={t.id}>
+  <td className="td-cell" style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{t.ticketId}</td>
+  <td className="td-cell" style={{ whiteSpace: "nowrap" }}>{t.date}</td>
+  <td className="td-cell">{t.raisedBy || "-"}</td>
+  <td className="td-cell">{t.createdBy?.split("@")[0]}</td>
+  <td className="td-cell">{t.businessUnit}</td>
+  <td className="td-cell">{t.module}</td>
+  <td className="td-cell">{t.supportType}</td>
 
-            {/* DESCRIPTION */}
-            <td
-              className="td-cell"
-              style={{ maxWidth: 240, whiteSpace: "pre-wrap" }}
-            >
-              {t.description}
-            </td>
+  <td className="td-cell" style={{ maxWidth: 240, whiteSpace: "pre-wrap" }}>
+    {t.description}
+  </td>
 
-            {/* PRIORITY */}
-            <td className="td-cell">
-              <select
-                value={t.priority || "Not Set"}
-                onChange={(e) => updatePriority(t.id, e.target.value)}
-                className="form-input"
-                style={{ width: "auto", minWidth: 90 }}
-              >
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </td>
+  <td className="td-cell">
+    <select
+      value={t.priority || "Not Set"}
+      onChange={(e) => updatePriority(t.id, e.target.value)}
+      className="form-input"
+      style={{ width: "auto", minWidth: 90 }}
+    >
+      {PRIORITIES.map((p) => (
+        <option key={p} value={p}>{p}</option>
+      ))}
+    </select>
+  </td>
 
-            {/* CLOSING REMARKS */}
-            <td className="td-cell" style={{ minWidth: 200 }}>
-              {t.status !== "Closed" ? (
-                <textarea
-                  rows={2}
-                  className="form-input"
-                  value={closingRemarks[t.id] || ""}
-                  onChange={(e) =>
-                    setClosingRemarks({
-                      ...closingRemarks,
-                      [t.id]: e.target.value,
-                    })
-                  }
-                />
-              ) : (
-                <span style={{ fontSize: 13, color: "#3a3a3c" }}>{t.resolutionRemarks || "-"}</span>
-              )}
-            </td>
+  {/* Fixed remarks cell */}
+  <td className="td-cell" style={{ minWidth: 200 }}>
+    <textarea
+      rows={3}
+      className="form-input"
+      value={closingRemarks[t.id] ?? t.resolutionRemarks ?? ""}
+      onChange={(e) =>
+        setClosingRemarks({
+          ...closingRemarks,
+          [t.id]: e.target.value,
+        })
+      }
+    />
+  </td>
 
-            {/* STATUS */}
-            <td className="td-cell" style={{ minWidth: 150 }}>
-              <select
-                value={t.status}
-                onChange={(e) => updateStatus(t.id, e.target.value)}
-                className="form-input"
-                style={{ width: "auto", minWidth: 120 }}
-              >
-                {STATUSES.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
+  <td className="td-cell" style={{ minWidth: 150 }}>
+    <select
+      value={t.status}
+      onChange={(e) => updateStatus(t.id, e.target.value)}
+      className="form-input"
+      style={{ width: "auto", minWidth: 120 }}
+    >
+      {STATUSES.map((s) => (
+        <option key={s}>{s}</option>
+      ))}
+    </select>
 
-              {/* REASSIGN INLINE */}
-              {t.status === "Reassigned" && (
-                <div style={{ marginTop: 6 }}>
-                  <select
-                    value={t.assignedTo || ""}
-                    onChange={(e) => updateAssignee(t.id, e.target.value)}
-                    className="form-input"
-                  >
-                    <option value="">Select Assignee</option>
-                    {ASSIGNEES.map((a) => (
-                      <option key={a} value={a}>{a}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </td>
-          </tr>
+    {t.status === "Reassigned" && (
+      <div style={{ marginTop: 6 }}>
+        <select
+          value={t.assignedTo || ""}
+          onChange={(e) => updateAssignee(t.id, e.target.value)}
+          className="form-input"
+        >
+          <option value="">Select Assignee</option>
+          {ASSIGNEES.map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </select>
+      </div>
+    )}
+  </td>
+</tr>
         ))}
       </tbody>
     </table>
