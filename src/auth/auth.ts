@@ -1,6 +1,6 @@
 // auth.ts
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "./firebase";  // ← your Firebase init file (import { initializeApp } from "firebase/app"; etc.)
+import { app } from "../firebase";  // ← your Firebase init file (import { initializeApp } from "firebase/app"; etc.)
 
 const auth = getAuth(app);
 
