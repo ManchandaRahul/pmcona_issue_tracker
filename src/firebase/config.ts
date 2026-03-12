@@ -14,11 +14,16 @@ const firebaseConfig = {
   measurementId: "G-NCC33FZDW2",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+
 
 // Initialize Firestore 🔥 THIS WAS MISSING
 export const db = getFirestore(app);
 
 // (Optional) Analytics — safe to keep
 export const analytics = getAnalytics(app);
+// ──────────────────────────────────────────────
+// ADD THIS LINE → this is what was missing
+export { app };
+// ──────────────────────────────────────────────
