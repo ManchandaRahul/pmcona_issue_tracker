@@ -2,7 +2,7 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app } from "../firebase/config";  // ← your Firebase init file (import { initializeApp } from "firebase/app"; etc.)
 
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
 export type Role = "admin" | "user";
 

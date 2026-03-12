@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
+import { auth } from "../auth/auth";  // this is correct!
 import {
   addDoc,
   collection,
@@ -96,36 +97,44 @@ export default function UserDashboard() {
   const [loadingTickets, setLoadingTickets] = useState(true);
   const [ticketError, setTicketError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user || !user.email) {
+useEffect(() => {
+  // Wait for Firebase to confirm the real logged-in user (this fixes the timing issue)
+  const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+    console.log("Firebase auth state:", firebaseUser ? "Logged in" : "Not logged in");
+
+    if (firebaseUser && firebaseUser.email) {
+      console.log("Real Firebase user:", firebaseUser.email, firebaseUser.uid);
+
+      // Use Firebase's user email for the query (more reliable than localStorage)
+      const q = query(
+        collection(db, "tickets"),
+        where("createdBy", "==", firebaseUser.email)
+      );
+
+      const unsubscribeSnapshot = onSnapshot(q,
+        (snap) => {
+          console.log("Tickets loaded successfully:", snap.size);
+          setTickets(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+          setLoadingTickets(false);
+        },
+        (err) => {
+          console.error("Firestore snapshot error:", err.code, err.message);
+          setTicketError(err.message || "Failed to load tickets");
+          setLoadingTickets(false);
+        }
+      );
+
+      // Cleanup snapshot listener when auth changes or component unmounts
+      return () => unsubscribeSnapshot();
+    } else {
       setTicketError("No user logged in. Please login again.");
       setLoadingTickets(false);
-      return;
     }
+  });
 
-    console.log("🔍 Querying tickets for:", user.email); // debug
-
-    const q = query(
-      collection(db, "tickets"),
-      where("createdBy", "==", user.email)
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snap) => {
-        console.log("✅ Tickets snapshot received:", snap.size); // debug
-        setTickets(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setLoadingTickets(false);
-      },
-      (err) => {
-        console.error("❌ onSnapshot error:", err);
-        setTicketError(err.message || "Failed to load tickets");
-        setLoadingTickets(false);
-      }
-    );
-
-    return unsubscribe;
-  }, [user?.email]);
+  // Cleanup auth listener when component unmounts
+  return unsubscribeAuth;
+}, []);  // Empty dependency array - only run once on mount
 
   const submitTicket = async () => {
     if (!raisedBy || !businessUnit || !module || !supportType || !description) {
