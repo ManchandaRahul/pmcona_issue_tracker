@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
+import { onAuthStateChanged } from "firebase/auth"; // ← ADD THIS LINE
+import type { User } from "firebase/auth";  // ← use 'type' import for types only
 import { auth } from "../auth/auth";  // this is correct!
+
 import {
   addDoc,
   collection,
@@ -98,14 +101,12 @@ export default function UserDashboard() {
   const [ticketError, setTicketError] = useState<string | null>(null);
 
 useEffect(() => {
-  // Wait for Firebase to confirm the real logged-in user (this fixes the timing issue)
-  const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+  const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser: User | null) => {
     console.log("Firebase auth state:", firebaseUser ? "Logged in" : "Not logged in");
 
     if (firebaseUser && firebaseUser.email) {
       console.log("Real Firebase user:", firebaseUser.email, firebaseUser.uid);
 
-      // Use Firebase's user email for the query (more reliable than localStorage)
       const q = query(
         collection(db, "tickets"),
         where("createdBy", "==", firebaseUser.email)
@@ -124,7 +125,6 @@ useEffect(() => {
         }
       );
 
-      // Cleanup snapshot listener when auth changes or component unmounts
       return () => unsubscribeSnapshot();
     } else {
       setTicketError("No user logged in. Please login again.");
@@ -132,9 +132,8 @@ useEffect(() => {
     }
   });
 
-  // Cleanup auth listener when component unmounts
   return unsubscribeAuth;
-}, []);  // Empty dependency array - only run once on mount
+}, []); // Empty dependency array - only run once on mount
 
   const submitTicket = async () => {
     if (!raisedBy || !businessUnit || !module || !supportType || !description) {
