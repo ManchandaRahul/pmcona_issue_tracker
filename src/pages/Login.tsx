@@ -2,19 +2,22 @@ import { useState } from "react";
 import { login } from "../auth/auth";
 
 export default function Login() {
-  // Always clear previous session on mount (good practice)
+  // Always clear previous session
   localStorage.removeItem("user");
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onLogin = async () => {
+  const onLogin = () => {
     try {
-      const userData = await login(username, password.trim());
+      const user = login(email.trim(), password.trim());
 
-      localStorage.setItem("user", JSON.stringify({ ...userData, loginAt: Date.now() }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...user, loginAt: Date.now() })
+      );
 
-      // Hard redirect
+      // Hard redirect (no router)
       window.location.href = import.meta.env.BASE_URL;
     } catch (err: any) {
       alert(err.message || "Invalid credentials");
@@ -31,91 +34,92 @@ export default function Login() {
         justifyContent: "center",
       }}
     >
-      <div
+<div
+  style={{
+    width: 360,
+    backgroundColor: "#ffffff",
+    border: "1px solid #d1d5db",
+    padding: 24,
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+  }}
+>
+  <h2 style={{ marginBottom: 8 }}>Support / Issue Tracker</h2>
+  <p style={{ marginBottom: 20, color: "#555", fontSize: 14 }}>
+    Secure Login
+  </p>
+
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      onLogin();
+    }}
+  >
+    {/* Email */}
+    <div style={{ marginBottom: 12 }}>
+      <label
         style={{
-          width: 360,
-          backgroundColor: "#ffffff",
-          border: "1px solid #d1d5db",
-          padding: 24,
-          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+          display: "block",
+          fontSize: 13,
+          marginBottom: 4,
         }}
       >
-        <h2 style={{ marginBottom: 8 }}>Support / Issue Tracker</h2>
-        <p style={{ marginBottom: 20, color: "#555", fontSize: 14 }}>
-          Secure Login
-        </p>
+        Email
+      </label>
+      <input
+        type="text"
+        placeholder="username"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 8,
+          border: "1px solid #9ca3af",
+        }}
+      />
+    </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onLogin();
-          }}
-        >
-          {/* Username */}
-          <div style={{ marginBottom: 12 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 13,
-                marginBottom: 4,
-              }}
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              placeholder="username (admin or user)"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 8,
-                border: "1px solid #9ca3af",
-              }}
-            />
-          </div>
+    {/* Password */}
+    <div style={{ marginBottom: 20 }}>
+      <label
+        style={{
+          display: "block",
+          fontSize: 13,
+          marginBottom: 4,
+        }}
+      >
+        Password
+      </label>
+      <input
+        type="password"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 8,
+          border: "1px solid #9ca3af",
+        }}
+      />
+    </div>
 
-          {/* Password */}
-          <div style={{ marginBottom: 20 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 13,
-                marginBottom: 4,
-              }}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 8,
-                border: "1px solid #9ca3af",
-              }}
-            />
-          </div>
+    {/* Login Button */}
+    <button
+      type="submit"
+      style={{
+        width: "100%",
+        padding: "10px 0",
+        backgroundColor: "#2563eb",
+        color: "#ffffff",
+        border: "none",
+        fontWeight: 600,
+        cursor: "pointer",
+      }}
+    >
+      Login
+    </button>
+  </form>
+</div>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "10px 0",
-              backgroundColor: "#2563eb",
-              color: "#ffffff",
-              border: "none",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Login
-          </button>
-        </form>
-      </div>
     </div>
   );
 }
